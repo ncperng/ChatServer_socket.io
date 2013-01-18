@@ -1,0 +1,35 @@
+extends layout
+
+block content
+	h1= title
+	p Welcome to #{title}
+	div#chat(style="width: 100%; height: 300px; border: 1px solid #999;")
+	div
+		form#form_chat
+			input(type="submit", value="Chat", style="float: left")
+			input#form_input(style="width: 200px; border: 1px solid #999;")
+
+	// Neil_20130116: Express knows the location of socket.io.
+	script(src="/socket.io/socket.io.js")
+	script
+		var server = io.connect('http://localhost:3000');
+
+		if(server) {
+			var nickname = prompt('Please input a nickname for chatting.');
+			server.emit('join', nickname);
+
+			server.on('chat', function(message) {
+				$('#chat').append(message + '<br>');
+			});
+	
+			$('#form_chat').submit(function(event) {
+				var message = $('#form_input').val();
+				$('#form_input').val('');
+
+				server.emit('chat', message);
+				event.preventDefault();
+			});
+		}
+		else {
+			alert('The ChatServer is down. Please try again later.');
+		}
